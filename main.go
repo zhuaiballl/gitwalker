@@ -41,6 +41,7 @@ func Copy(from, to string) {
 }
 
 func main() {
+	depth := 1
 	for {
 		cmd := exec.Command("git", "checkout", "HEAD^")
 		err := cmd.Run()
@@ -51,7 +52,8 @@ func main() {
 		if err != nil {
 			log.Panic(err)
 		}
-		h := fmt.Sprint(string(head[:7]))
+		h := fmt.Sprintf("%04d", depth) + fmt.Sprint(string(head[:7]))
+		depth++
 		fmt.Println("commitID:", h)
 		homedir, err := os.UserHomeDir()
 		if err != nil {
