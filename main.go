@@ -104,5 +104,4 @@ func main() {
 			return nil
 		})
 	}
-	fmt.Println("Hello world!")
 }
