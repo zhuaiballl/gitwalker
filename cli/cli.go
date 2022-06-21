@@ -12,6 +12,7 @@ type CLI struct{}
 func (cli *CLI) printUsage() {
 	fmt.Println("Usage:")
 	fmt.Println("  walk - Default usage of gitwalker")
+	fmt.Println("  walkByTag - output versions that have tags")
 }
 
 func (cli *CLI) validateArgs() {
@@ -24,10 +25,16 @@ func (cli *CLI) validateArgs() {
 func (cli *CLI) Run() {
 	cli.validateArgs()
 	walkCmd := flag.NewFlagSet("walk", flag.ExitOnError)
+	walkByTagCmd := flag.NewFlagSet("walkByTag", flag.ExitOnError)
 
 	switch os.Args[1] {
 	case "walk":
 		err := walkCmd.Parse(os.Args[2:])
+		if err != nil {
+			log.Panic(err)
+		}
+	case "walkByTag":
+		err := walkByTagCmd.Parse(os.Args[2:])
 		if err != nil {
 			log.Panic(err)
 		}
@@ -40,5 +47,9 @@ func (cli *CLI) Run() {
 
 	if walkCmd.Parsed() {
 		cli.walk()
+	}
+
+	if walkByTagCmd.Parsed() {
+		cli.walkByTag()
 	}
 }

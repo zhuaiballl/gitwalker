@@ -83,3 +83,34 @@ func (cli *CLI) walk() {
 		//})
 	}
 }
+
+func (cli *CLI) walkByTag() {
+	cmd := exec.Command("git", "tag")
+	tagOut, err := cmd.Output()
+	if err != nil {
+		log.Panic(err)
+	}
+	tags := strings.Split(string(tagOut), "\n")
+	tags = tags[:len(tags)-1]
+	homedir, err := os.UserHomeDir()
+	if err != nil {
+		log.Panic(err)
+	}
+	cur, err := os.Getwd()
+	for i, tag := range tags {
+		fmt.Println(tag, "QAQ")
+		cmd = exec.Command("git", "checkout", tag)
+		folderName := fmt.Sprintf("%04d_", i) + tag
+		copyOpt := copy.Options{
+			Skip: func(src string) (bool, error) {
+				return strings.HasSuffix(src, ".git") || strings.HasSuffix(src, "gitwalker"), nil
+			},
+		}
+		dir := homedir + "/.gitwalker/" + folderName
+		err = copy.Copy(cur, dir, copyOpt)
+		if err != nil {
+			log.Panic(err)
+		}
+	}
+
+}
