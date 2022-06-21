@@ -2,12 +2,11 @@ package cli
 
 import (
 	"fmt"
-	"github.com/zhuaiballl/gitwalker/util"
-	"io/fs"
+	"github.com/otiai10/copy"
 	"log"
 	"os"
 	"os/exec"
-	"path/filepath"
+	"strings"
 )
 
 func (cli *CLI) walk() {
@@ -37,41 +36,50 @@ func (cli *CLI) walk() {
 		if err != nil {
 			log.Panic(err)
 		}
-		skipList := map[string]bool{
-			"gitwalker": true,
-			".git":      true,
-			".idea":     true,
-			".DS_Store": true,
+		//skipList := map[string]bool{
+		//	"gitwalker": true,
+		//	".git":      true,
+		//	".idea":     true,
+		//	".DS_Store": true,
+		//}
+		copyOpt := copy.Options{
+			Skip: func(src string) (bool, error) {
+				return strings.HasSuffix(src, ".git") || strings.HasSuffix(src, "gitwalker"), nil
+			},
 		}
-		curLen := len(cur)
-		err = filepath.Walk(cur, func(path string, info fs.FileInfo, err error) error {
-			fmt.Println("current path is", path)
-			if err != nil {
-				return err
-			}
-			if _, fd := skipList[info.Name()]; fd {
-				if info.IsDir() {
-					return filepath.SkipDir
-				} else {
-					return nil
-				}
-			}
-			destPath := dir + path[curLen:]
-			_, err = os.Stat(destPath)
-			if util.Exist(err) {
-				return nil
-			} else {
-				if info.IsDir() {
-					err = os.Mkdir(destPath, os.ModePerm)
-					if err != nil {
-						log.Panic(err)
-						return err
-					}
-				} else {
-					util.Copy(path, destPath)
-				}
-			}
-			return nil
-		})
+		err = copy.Copy(cur, dir, copyOpt)
+		if err != nil {
+			log.Panic(err)
+		}
+		//curLen := len(cur)
+		//err = filepath.Walk(cur, func(path string, info fs.FileInfo, err error) error {
+		//	fmt.Println("current path is", path)
+		//	if err != nil {
+		//		return err
+		//	}
+		//	if _, fd := skipList[info.Name()]; fd {
+		//		if info.IsDir() {
+		//			return filepath.SkipDir
+		//		} else {
+		//			return nil
+		//		}
+		//	}
+		//	destPath := dir + path[curLen:]
+		//	_, err = os.Stat(destPath)
+		//	if util.Exist(err) {
+		//		return nil
+		//	} else {
+		//		if info.IsDir() {
+		//			err = os.Mkdir(destPath, os.ModePerm)
+		//			if err != nil {
+		//				log.Panic(err)
+		//				return err
+		//			}
+		//		} else {
+		//			util.Copy(path, destPath)
+		//		}
+		//	}
+		//	return nil
+		//})
 	}
 }
