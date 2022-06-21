@@ -11,6 +11,7 @@ type CLI struct{}
 
 func (cli *CLI) printUsage() {
 	fmt.Println("Usage:")
+	fmt.Println("  countTag - Count the number of tags")
 	fmt.Println("  walk - Default usage of gitwalker")
 	fmt.Println("  walkByTag - output versions that have tags")
 }
@@ -24,10 +25,16 @@ func (cli *CLI) validateArgs() {
 
 func (cli *CLI) Run() {
 	cli.validateArgs()
+	countTagCmd := flag.NewFlagSet("countTag", flag.ExitOnError)
 	walkCmd := flag.NewFlagSet("walk", flag.ExitOnError)
 	walkByTagCmd := flag.NewFlagSet("walkByTag", flag.ExitOnError)
 
 	switch os.Args[1] {
+	case "countTag":
+		err := countTagCmd.Parse(os.Args[2:])
+		if err != nil {
+			log.Panic(err)
+		}
 	case "walk":
 		err := walkCmd.Parse(os.Args[2:])
 		if err != nil {
@@ -38,11 +45,10 @@ func (cli *CLI) Run() {
 		if err != nil {
 			log.Panic(err)
 		}
-	default:
-		err := walkCmd.Parse(os.Args[2:])
-		if err != nil {
-			log.Panic(err)
-		}
+	}
+
+	if countTagCmd.Parsed() {
+		cli.countTag()
 	}
 
 	if walkCmd.Parsed() {

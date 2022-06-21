@@ -9,6 +9,16 @@ import (
 	"strings"
 )
 
+func (cli *CLI) countTag() {
+	cmd := exec.Command("git", "tag")
+	tagOut, err := cmd.Output()
+	if err != nil {
+		log.Panic(err)
+	}
+	tags := strings.Split(string(tagOut), "\n")
+	fmt.Println(len(tags) - 1)
+}
+
 func (cli *CLI) walk() {
 	depth := 1
 	for {
@@ -98,7 +108,7 @@ func (cli *CLI) walkByTag() {
 	}
 	cur, err := os.Getwd()
 	for i, tag := range tags {
-		fmt.Println(tag, "QAQ")
+		fmt.Println(tag)
 		cmd = exec.Command("git", "checkout", tag)
 		folderName := fmt.Sprintf("%04d_", i) + tag
 		copyOpt := copy.Options{
