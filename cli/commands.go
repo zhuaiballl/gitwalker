@@ -31,7 +31,7 @@ func (cli *CLI) walk() {
 		if err != nil {
 			log.Panic(err)
 		}
-		h := fmt.Sprintf("%04d", depth) + fmt.Sprint(string(head[:7]))
+		h := fmt.Sprintf("%04d_", depth) + fmt.Sprint(string(head[:7]))
 		depth++
 		fmt.Println("commitID:", h)
 		homedir, err := os.UserHomeDir()
