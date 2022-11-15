@@ -98,7 +98,7 @@ func (cli *CLI) walk(bare bool) {
 }
 
 func (cli *CLI) walkByTag(bare bool) {
-	cmd := exec.Command("git", "tag")
+	cmd := exec.Command("git", "tag", "-l", "--sort=v:refname")
 	tagOut, err := cmd.Output()
 	if err != nil {
 		log.Panic(err)
