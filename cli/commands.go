@@ -113,6 +113,7 @@ func (cli *CLI) walkByTag(bare bool) {
 	for i, tag := range tags {
 		fmt.Println(tag)
 		cmd = exec.Command("git", "checkout", tag)
+		err = cmd.Run()
 		folderName := fmt.Sprintf("%04d", i)
 		if !bare {
 			folderName += "_" + tag
