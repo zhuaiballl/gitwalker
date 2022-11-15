@@ -19,7 +19,7 @@ func (cli *CLI) countTag() {
 	fmt.Println(len(tags) - 1)
 }
 
-func (cli *CLI) walk() {
+func (cli *CLI) walk(bare bool) {
 	depth := 1
 	for {
 		cmd := exec.Command("git", "checkout", "HEAD^")
@@ -31,7 +31,10 @@ func (cli *CLI) walk() {
 		if err != nil {
 			log.Panic(err)
 		}
-		h := fmt.Sprintf("%04d_", depth) + fmt.Sprint(string(head[:7]))
+		h := fmt.Sprintf("%04d", depth)
+		if !bare {
+			h += "_" + fmt.Sprint(string(head[:7]))
+		}
 		depth++
 		fmt.Println("commitID:", h)
 		homedir, err := os.UserHomeDir()
@@ -94,7 +97,7 @@ func (cli *CLI) walk() {
 	}
 }
 
-func (cli *CLI) walkByTag() {
+func (cli *CLI) walkByTag(bare bool) {
 	cmd := exec.Command("git", "tag")
 	tagOut, err := cmd.Output()
 	if err != nil {
@@ -110,7 +113,10 @@ func (cli *CLI) walkByTag() {
 	for i, tag := range tags {
 		fmt.Println(tag)
 		cmd = exec.Command("git", "checkout", tag)
-		folderName := fmt.Sprintf("%04d_", i) + tag
+		folderName := fmt.Sprintf("%04d", i)
+		if !bare {
+			folderName += "_" + tag
+		}
 		copyOpt := copy.Options{
 			Skip: func(src string) (bool, error) {
 				return strings.HasSuffix(src, ".git") || strings.HasSuffix(src, "gitwalker"), nil

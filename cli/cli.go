@@ -29,6 +29,9 @@ func (cli *CLI) Run() {
 	walkCmd := flag.NewFlagSet("walk", flag.ExitOnError)
 	walkByTagCmd := flag.NewFlagSet("walkByTag", flag.ExitOnError)
 
+	walkBare := walkCmd.Bool("bare", false, "do not add commit id to output folder")
+	walkByTagBare := walkByTagCmd.Bool("bare", false, "do not add commit id to output folder")
+
 	switch os.Args[1] {
 	case "countTag":
 		err := countTagCmd.Parse(os.Args[2:])
@@ -45,6 +48,8 @@ func (cli *CLI) Run() {
 		if err != nil {
 			log.Panic(err)
 		}
+	default:
+		cli.printUsage()
 	}
 
 	if countTagCmd.Parsed() {
@@ -52,10 +57,10 @@ func (cli *CLI) Run() {
 	}
 
 	if walkCmd.Parsed() {
-		cli.walk()
+		cli.walk(*walkBare)
 	}
 
 	if walkByTagCmd.Parsed() {
-		cli.walkByTag()
+		cli.walkByTag(*walkByTagBare)
 	}
 }
