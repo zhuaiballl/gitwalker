@@ -20,80 +20,36 @@ func (cli *CLI) countTag() {
 }
 
 func (cli *CLI) walk(bare bool) {
-	depth := 1
-	for {
-		cmd := exec.Command("git", "checkout", "HEAD^")
-		err := cmd.Run()
-		if err != nil {
-			log.Panic(err)
-		}
-		head, err := exec.Command("git", "rev-parse", "--short", "HEAD").Output()
-		if err != nil {
-			log.Panic(err)
-		}
-		h := fmt.Sprintf("%04d", depth)
+	cmd := exec.Command("git", "rev-list", "--reverse", "HEAD")
+	commitOut, err := cmd.Output()
+	if err != nil {
+		log.Panic(err)
+	}
+	commits := strings.Split(string(commitOut), "\n")
+	commits = commits[:len(commits)-1]
+	homedir, err := os.UserHomeDir()
+	if err != nil {
+		log.Panic(err)
+	}
+	cur, err := os.Getwd()
+	for i, commit := range commits {
+		fmt.Println(commit)
+		cmd = exec.Command("git", "checkout", commit)
+		err = cmd.Run()
+		folderName := fmt.Sprintf("%04d", i)
 		if !bare {
-			h += "_" + fmt.Sprint(string(head[:7]))
+			folderName += "_" + commit
 		}
-		depth++
-		fmt.Println("commitID:", h)
-		homedir, err := os.UserHomeDir()
-		if err != nil {
-			log.Panic(err)
-		}
-		dir := homedir + "/.gitwalker/" + h
-		//fmt.Println(dir)
-		err = os.MkdirAll(dir, os.ModePerm)
-		// err = exec.Command("cp", ".", "dir").Run()
-		cur, err := os.Getwd()
-		if err != nil {
-			log.Panic(err)
-		}
-		//skipList := map[string]bool{
-		//	"gitwalker": true,
-		//	".git":      true,
-		//	".idea":     true,
-		//	".DS_Store": true,
-		//}
 		copyOpt := copy.Options{
 			Skip: func(src string) (bool, error) {
 				return strings.HasSuffix(src, ".git") || strings.HasSuffix(src, "gitwalker"), nil
 			},
 		}
+		dir := homedir + "/.gitwalker/" + folderName
 		err = copy.Copy(cur, dir, copyOpt)
 		if err != nil {
 			log.Panic(err)
 		}
-		//curLen := len(cur)
-		//err = filepath.Walk(cur, func(path string, info fs.FileInfo, err error) error {
-		//	fmt.Println("current path is", path)
-		//	if err != nil {
-		//		return err
-		//	}
-		//	if _, fd := skipList[info.Name()]; fd {
-		//		if info.IsDir() {
-		//			return filepath.SkipDir
-		//		} else {
-		//			return nil
-		//		}
-		//	}
-		//	destPath := dir + path[curLen:]
-		//	_, err = os.Stat(destPath)
-		//	if util.Exist(err) {
-		//		return nil
-		//	} else {
-		//		if info.IsDir() {
-		//			err = os.Mkdir(destPath, os.ModePerm)
-		//			if err != nil {
-		//				log.Panic(err)
-		//				return err
-		//			}
-		//		} else {
-		//			util.Copy(path, destPath)
-		//		}
-		//	}
-		//	return nil
-		//})
 	}
 }
 
